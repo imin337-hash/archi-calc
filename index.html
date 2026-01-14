@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>건축 평수 계산기</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .calculator { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background-color: #2DB400; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #259600; }
+        .result { margin-top: 20px; font-weight: bold; text-align: center; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <h2>📐 건축 면적 계산기</h2>
+    <p>평수를 입력하세요:</p>
+    <input type="number" id="pyeong" placeholder="예: 32">
+    <button onclick="convert()">계산하기</button>
+    <div class="result" id="output">결과가 여기에 표시됩니다.</div>
+</div>
+
+<script>
+    function convert() {
+        const pyeong = document.getElementById('pyeong').value;
+        if(pyeong) {
+            // 1평 = 3.305785 m^2
+            const m2 = (pyeong * 3.305785).toFixed(2);
+            document.getElementById('output').innerHTML = 
+                `${pyeong}평은 약 <span style="color:red; font-size:1.2em;">${m2}</span> $m^2$ 입니다.`;
+        } else {
+            alert("숫자를 입력해주세요!");
+        }
+    }
+</script>
+
+</body>
+</html>
