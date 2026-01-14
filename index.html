@@ -3,246 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>건축 실무 통합 도구</title>
+    <title>건축 실무 통합 솔루션</title>
     <style>
-        /* 공통 스타일 */
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
-        .app-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; }
+        /* [스타일 정의] */
+        :root { --primary: #2DB400; --dark: #333; --light: #f4f6f8; }
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background: var(--light); margin: 0; padding: 10px; color: var(--dark); }
+        .app-container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; }
         
-        /* 메인 네비게이션 (모드 전환) */
-        .main-nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav-item { flex: 1; padding: 15px; border: none; border-radius: 10px; background: #e0e0e0; color: #555; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
-        .nav-item.active-mode { background-color: #333; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .nav-item:hover:not(.active-mode) { background-color: #d0d0d0; }
+        /* 상단 네비게이션 (스크롤 가능) */
+        .nav-bar { display: flex; overflow-x: auto; background: #fff; border-bottom: 1px solid #ddd; white-space: nowrap; }
+        .nav-item { flex: 1; min-width: 100px; padding: 15px 10px; border: none; background: none; font-size: 14px; font-weight: bold; color: #888; cursor: pointer; transition: 0.2s; text-align: center; }
+        .nav-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: #f9fff9; }
+        .nav-item:hover { background: #f5f5f5; }
 
-        /* 섹션 제어 */
-        .mode-section { display: none; animation: fadeIn 0.4s; }
-        .mode-section.active { display: block; }
+        /* 컨텐츠 영역 */
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
         
-        /* 컨테이너 스타일 */
-        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-
-        /* --- [모드 1] 계산기 스타일 --- */
-        .tab-menu { display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-weight: bold; color: #888; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: #2DB400; border-bottom-color: #2DB400; }
-        .calc-content { display: none; }
-        .calc-content.active { display: block; }
-
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #444; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
-        input:focus { border-color: #2DB400; outline: none; }
-
-        .btn-action { width: 100%; padding: 14px; background-color: #2DB400; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-action:hover { background-color: #259600; }
+        /* 입력 폼 스타일 */
+        h3 { margin: 0 0 15px 0; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
         
-        .result-box { margin-top: 15px; padding: 15px; background: #f8f9fa; border-left: 5px solid #2DB400; border-radius: 5px; display: none; line-height: 1.5; color: #333; }
-        .highlight { color: #d35400; font-weight: bold; font-size: 1.2em; }
-
-        /* --- [모드 2] 개요표 스타일 --- */
-        .overview-layout { display: flex; flex-direction: column; gap: 20px; }
-        .preview-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
-        .btn-copy { width: 100%; padding: 12px; background-color: #333; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        /* 버튼 스타일 */
+        .btn-calc { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-calc:hover { background: #259600; }
+        .btn-copy { width: 100%; padding: 10px; background: #555; color: white; border: none; border-radius: 6px; margin-top: 10px; cursor: pointer; }
+        
+        /* 결과 박스 */
+        .result-area { margin-top: 20px; background: #f8f9fa; border: 1px dashed #ccc; padding: 15px; border-radius: 8px; font-size: 14px; }
+        .info-text { font-size: 12px; color: #888; margin-top: 5px; line-height: 1.4; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 테이블 스타일 (결과용) */
+        .res-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .res-table th { background: #eee; padding: 8px; border: 1px solid #ccc; width: 35%; text-align: center; }
+        .res-table td { padding: 8px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
-<div class="app-wrapper">
-    <nav class="main-nav">
-        <button class="nav-item active-mode" onclick="switchMode('calc')">🧮 공사 계산기</button>
-        <button class="nav-item" onclick="switchMode('doc')">📝 건축개요 작성</button>
+<div class="app-container">
+    <nav class="nav-bar">
+        <button class="nav-item active" onclick="goTab('tab1', this)">1. 건축개요</button>
+        <button class="nav-item" onclick="goTab('tab2', this)">2. 주차산정</button>
+        <button class="nav-item" onclick="goTab('tab3', this)">3. 법규검토</button>
+        <button class="nav-item" onclick="goTab('tab4', this)">4. 정화조</button>
     </nav>
 
-    <div id="mode-calc" class="mode-section active">
-        <div class="card">
-            <div class="tab-menu">
-                <button class="tab-btn active" onclick="openCalcTab(event, 'c_area')">평수변환</button>
-                <button class="tab-btn" onclick="openCalcTab(event, 'c_tile')">타일물량</button>
-                <button class="tab-btn" onclick="openCalcTab(event, 'c_conc')">레미콘</button>
-            </div>
-
-            <div id="c_area" class="calc-content active">
-                <div class="input-group">
-                    <label>평수 입력</label>
-                    <input type="number" id="pyeongInput" placeholder="예: 32">
-                </div>
-                <button class="btn-action" onclick="runCalcArea()">변환하기</button>
-                <div id="res1" class="result-box"></div>
-            </div>
-
-            <div id="c_tile" class="calc-content">
-                <div class="input-group">
-                    <label>시공 면적 ($m^2$)</label>
-                    <input type="number" id="wallArea" placeholder="헤베 입력">
-                </div>
-                <div class="input-group">
-                    <label>타일 크기 (mm)</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="number" id="tileW" placeholder="가로 (예: 300)">
-                        <input type="number" id="tileH" placeholder="세로 (예: 600)">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>로스율</label>
-                    <select id="lossRate">
-                        <option value="1.05">5% (일반)</option>
-                        <option value="1.10">10% (복잡)</option>
-                        <option value="1.00">없음</option>
-                    </select>
-                </div>
-                <button class="btn-action" onclick="runCalcTile()">타일 수량 계산</button>
-                <div id="res2" class="result-box"></div>
-            </div>
-
-            <div id="c_conc" class="calc-content">
-                <div class="input-group">
-                    <label>타설 공간 크기 (m)</label>
-                    <div style="display:flex; gap:10px; margin-bottom:5px;">
-                        <input type="number" id="concW" placeholder="가로(m)">
-                        <input type="number" id="concL" placeholder="세로(m)">
-                    </div>
-                    <input type="number" id="concH" placeholder="높이/두께 (cm 단위!!)">
-                </div>
-                <button class="btn-action" onclick="runCalcConc()">루베 계산</button>
-                <div id="res3" class="result-box"></div>
-            </div>
-        </div>
+    <div id="tab1" class="tab-content active">
+        <h3>📝 건축개요 작성</h3>
+        <div class="input-group"><label>공사명</label><input type="text" id="ov_title" placeholder="예: 양평군 단독주택"></div>
+        <div class="input-group"><label>대지면적 ($m^2$)</label><input type="number" id="ov_site"></div>
+        <div class="input-group"><label>건축면적 ($m^2$)</label><input type="number" id="ov_build"></div>
+        <div class="input-group"><label>지상 연면적 ($m^2$)</label><input type="number" id="ov_floor" placeholder="용적률 산정용"></div>
+        <div class="input-group"><label>전체 연면적 ($m^2$)</label><input type="number" id="ov_total" placeholder="지하 포함 전체"></div>
+        <div class="input-group"><label>규모/구조</label><input type="text" id="ov_scale" placeholder="예: 지상2층 / 철콘"></div>
+        <button class="btn-calc" onclick="calcOverview()">개요표 생성</button>
+        
+        <div id="res1" class="result-area">결과가 여기에 표시됩니다.</div>
+        <button class="btn-copy" onclick="copyDiv('res1')">📋 표 복사하기</button>
     </div>
 
-    <div id="mode-doc" class="mode-section">
-        <div class="card overview-layout">
-            <div style="background:#f1f3f5; padding:15px; border-radius:8px;">
-                <h3 style="margin:0 0 15px 0; font-size:16px;">🏗️ 기본 정보 입력</h3>
-                <div class="input-group"><label>공사명</label><input type="text" id="ov_loc" placeholder="예: 양평 단독주택 신축"></div>
-                <div class="input-group"><label>대지면적 ($m^2$)</label><input type="number" id="ov_site" placeholder="숫자만"></div>
-                <div class="input-group"><label>건축면적 ($m^2$)</label><input type="number" id="ov_build" placeholder="숫자만"></div>
-                <div class="input-group"><label>지상 연면적 ($m^2$)</label><input type="number" id="ov_floor" placeholder="용적률 계산용"></div>
-                <div class="input-group"><label>전체 연면적 ($m^2$)</label><input type="number" id="ov_total" placeholder="지하 포함"></div>
-                <div class="input-group"><label>규모/구조</label><input type="text" id="ov_scale" placeholder="예: 지상2층 / 철콘"></div>
-                <div class="input-group"><label>주차대수</label><input type="text" id="ov_park" placeholder="예: 2대"></div>
-                <button class="btn-action" onclick="generateTable()">표 생성하기</button>
-            </div>
-
-            <div class="preview-box">
-                <label>▼ 결과 (표 복사 후 블로그에 붙여넣기)</label>
-                <div id="tableResult" style="background:white; padding:10px;">
-                    <p style="text-align:center; color:#999; padding:20px;">정보 입력 후 버튼을 누르세요.</p>
-                </div>
-                <button class="btn-copy" onclick="copyResult()">📋 표 복사하기</button>
-            </div>
+    <div id="tab2" class="tab-content">
+        <h3>🚗 주차대수 계산</h3>
+        <p class="info-text">* 지자체 조례에 따라 설치 기준이 다릅니다. (예: 서울시 상가 134㎡당 1대 등)</p>
+        <div class="input-group">
+            <label>시설 용도</label>
+            <input type="text" id="pk_use" placeholder="예: 근린생활시설, 단독주택">
         </div>
+        <div class="input-group">
+            <label>시설 면적 ($m^2$)</label>
+            <input type="number" id="pk_area">
+        </div>
+        <div class="input-group">
+            <label>설치 기준 ($m^2$ 당 1대)</label>
+            <input type="number" id="pk_std" placeholder="예: 134, 150, 200 등">
+        </div>
+        <button class="btn-calc" onclick="calcParking()">주차대수 산출</button>
+
+        <div id="res2" class="result-area">결과가 여기에 표시됩니다.</div>
+        <button class="btn-copy" onclick="copyDiv('res2')">📋 결과 복사하기</button>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <h3>⚖️ 법규 검토 체크리스트</h3>
+        <div class="input-group">
+            <label>1. 지역/지구</label>
+            <select id="law_zone"><option>도시지역 / 제1종일반주거</option><option>관리지역 / 계획관리</option><option>직접입력</option></select>
+        </div>
+        <div class="input-group">
+            <label>2. 도로 너비 (접도조건)</label>
+            <select id="law_road"><option>적합 (4m 이상 확보)</option><option>부적합 (도로확폭 필요)</option><option>해당없음</option></select>
+        </div>
+        <div class="input-group">
+            <label>3. 일조권 사선제한</label>
+            <select id="law_sun"><option>적합 (북측 이격 준수)</option><option>검토 필요</option><option>해당없음</option></select>
+        </div>
+        <div class="input-group">
+            <label>4. 에너지절약 설계기준</label>
+            <select id="law_energy"><option>적합 (단열 기준 충족)</option><option>미대상</option></select>
+        </div>
+        <div class="input-group">
+            <label>검토 의견 (Memo)</label>
+            <textarea id="law_memo" rows="3" placeholder="특이사항을 입력하세요"></textarea>
+        </div>
+        <button class="btn-calc" onclick="makeChecklist()">체크리스트 생성</button>
+
+        <div id="res3" class="result-area">결과가 여기에 표시됩니다.</div>
+        <button class="btn-copy" onclick="copyDiv('res3')">📋 리스트 복사하기</button>
+    </div>
+
+    <div id="tab4" class="tab-content">
+        <h3>🚽 정화조 인원산정 (N)</h3>
+        <div class="input-group">
+            <label>업종 선택 (오염계수)</label>
+            <select id="sep_type" onchange="toggleSepInput()">
+                <option value="0.075">일반 사무소 (0.075)</option>
+                <option value="0.175">일반 음식점 (0.175)</option>
+                <option value="0.05">단독주택 (면적기반 약식)</option>
+                <option value="custom">직접 입력</option>
+            </select>
+        </div>
+        <div class="input-group" id="sep_custom_box" style="display:none;">
+            <label>계수 직접 입력</label>
+            <input type="number" id="sep_coeff" placeholder="예: 0.1">
+        </div>
+        <div class="input-group">
+            <label>연면적 ($m^2$)</label>
+            <input type="number" id="sep_area">
+        </div>
+        <button class="btn-calc" onclick="calcSeptic()">용량(인원) 계산</button>
+
+        <div id="res4" class="result-area">결과가 여기에 표시됩니다.</div>
+        <button class="btn-copy" onclick="copyDiv('res4')">📋 결과 복사하기</button>
     </div>
 </div>
 
 <script>
-    // --- 1. 모드 전환 (계산기 <-> 개요) ---
-    function switchMode(mode) {
-        document.querySelectorAll('.mode-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-mode'));
-        
-        document.getElementById('mode-' + mode).classList.add('active');
-        // 버튼 활성화 스타일 처리
-        if(mode === 'calc') document.querySelector('.nav-item:nth-child(1)').classList.add('active-mode');
-        else document.querySelector('.nav-item:nth-child(2)').classList.add('active-mode');
+    // 탭 이동 함수
+    function goTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
     }
 
-    // --- 2. 계산기 탭 전환 ---
-    function openCalcTab(evt, tabName) {
-        document.querySelectorAll('.calc-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabName).classList.add('active');
-        evt.currentTarget.classList.add('active');
-    }
+    // [1] 건축개요 계산
+    function calcOverview() {
+        const site = parseFloat(document.getElementById('ov_site').value);
+        const build = parseFloat(document.getElementById('ov_build').value);
+        const floor = parseFloat(document.getElementById('ov_floor').value);
+        const total = document.getElementById('ov_total').value;
+        const title = document.getElementById('ov_title').value;
+        const scale = document.getElementById('ov_scale').value;
 
-    // --- 3. 계산 로직들 ---
-    function showMsg(id, html) {
-        const box = document.getElementById(id);
-        box.innerHTML = html;
-        box.style.display = 'block';
-    }
+        if(!site) return alert("대지면적을 입력하세요.");
 
-    function runCalcArea() {
-        const p = parseFloat(document.getElementById('pyeongInput').value);
-        if(!p) return;
-        const m2 = (p * 3.305785).toFixed(2);
-        showMsg('res1', `${p}평은 <span class="highlight">${m2}</span>m² 입니다.`);
-    }
-
-    function runCalcTile() {
-        const area = parseFloat(document.getElementById('wallArea').value);
-        const w = parseFloat(document.getElementById('tileW').value);
-        const h = parseFloat(document.getElementById('tileH').value);
-        const loss = parseFloat(document.getElementById('lossRate').value);
-        if(!area || !w || !h) return alert('모든 값을 넣어주세요');
-        
-        const oneTile = (w/1000) * (h/1000);
-        const total = Math.ceil((area / oneTile) * loss);
-        showMsg('res2', `필요 타일: <span class="highlight">${total}</span>장 (여유분 포함)`);
-    }
-
-    function runCalcConc() {
-        const w = parseFloat(document.getElementById('concW').value);
-        const l = parseFloat(document.getElementById('concL').value);
-        const h = parseFloat(document.getElementById('concH').value);
-        if(!w || !l || !h) return alert('모든 치수를 넣어주세요');
-        
-        const vol = (w * l * (h/100)).toFixed(2);
-        const trucks = (vol / 6).toFixed(1);
-        showMsg('res3', `부피: <span class="highlight">${vol}</span>m³ (루베)<br>레미콘(6m³): 약 <b>${trucks}대</b>`);
-    }
-
-    // --- 4. 건축개요 표 생성 및 복사 ---
-    function generateTable() {
-        const d = {
-            loc: document.getElementById('ov_loc').value,
-            site: document.getElementById('ov_site').value,
-            build: document.getElementById('ov_build').value,
-            floor: document.getElementById('ov_floor').value,
-            total: document.getElementById('ov_total').value,
-            scale: document.getElementById('ov_scale').value,
-            park: document.getElementById('ov_park').value
-        };
-
-        if(!d.site) return alert("대지면적은 필수입니다.");
-        
-        const bcr = ((d.build / d.site) * 100).toFixed(2);
-        const far = ((d.floor / d.site) * 100).toFixed(2);
+        const bcr = ((build/site)*100).toFixed(2);
+        const far = ((floor/site)*100).toFixed(2);
 
         const html = `
-        <table style="width:100%; border-collapse:collapse; font-size:14px; font-family:'Malgun Gothic'; text-align:left;">
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;width:30%;">공사명</th><td style="border:1px solid #ccc;padding:8px;">${d.loc}</td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">대지면적</th><td style="border:1px solid #ccc;padding:8px;">${d.site}m²</td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">건축면적</th><td style="border:1px solid #ccc;padding:8px;">${d.build}m²</td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">연면적</th><td style="border:1px solid #ccc;padding:8px;">${d.total}m²</td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">건폐율</th><td style="border:1px solid #ccc;padding:8px;color:#d35400;"><b>${bcr}%</b></td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">용적률</th><td style="border:1px solid #ccc;padding:8px;color:#d35400;"><b>${far}%</b></td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">규모/구조</th><td style="border:1px solid #ccc;padding:8px;">${d.scale}</td></tr>
-            <tr><th style="background:#eee;border:1px solid #ccc;padding:8px;">주차</th><td style="border:1px solid #ccc;padding:8px;">${d.park}</td></tr>
-        </table>`;
-        
-        document.getElementById('tableResult').innerHTML = html;
+            <table class="res-table">
+                <tr><th>공사명</th><td>${title}</td></tr>
+                <tr><th>대지면적</th><td>${site} m²</td></tr>
+                <tr><th>건축면적</th><td>${build} m²</td></tr>
+                <tr><th>연면적</th><td>${total} m²</td></tr>
+                <tr><th>건폐율</th><td><b>${bcr}%</b></td></tr>
+                <tr><th>용적률</th><td><b>${far}%</b></td></tr>
+                <tr><th>규모</th><td>${scale}</td></tr>
+            </table>`;
+        document.getElementById('res1').innerHTML = html;
     }
 
-    function copyResult() {
-        const node = document.getElementById('tableResult');
-        if(!node.querySelector('table')) return alert('먼저 표를 생성하세요.');
+    // [2] 주차대수 계산
+    function calcParking() {
+        const use = document.getElementById('pk_use').value;
+        const area = parseFloat(document.getElementById('pk_area').value);
+        const std = parseFloat(document.getElementById('pk_std').value);
+
+        if(!area || !std) return alert("면적과 기준을 입력하세요.");
+
+        const count = (area / std).toFixed(2); // 단순 나눗셈
+        const finalCount = Math.round(area / std); // 반올림 (지자체별 상이하므로 참고용)
+
+        const html = `
+            <table class="res-table">
+                <tr><th>용도</th><td>${use}</td></tr>
+                <tr><th>산정면적</th><td>${area} m²</td></tr>
+                <tr><th>설치기준</th><td>${std} m² 당 1대</td></tr>
+                <tr><th>계산값</th><td>${count} 대</td></tr>
+                <tr><th>법정대수</th><td style="color:#d35400;"><b>약 ${finalCount} 대</b><br><span style="font-size:11px; color:#888">(지자체 조례 확인필수)</span></td></tr>
+            </table>`;
+        document.getElementById('res2').innerHTML = html;
+    }
+
+    // [3] 법규검토 리스트
+    function makeChecklist() {
+        const zone = document.getElementById('law_zone').value;
+        const road = document.getElementById('law_road').value;
+        const sun = document.getElementById('law_sun').value;
+        const energy = document.getElementById('law_energy').value;
+        const memo = document.getElementById('law_memo').value;
+
+        const html = `
+            <table class="res-table">
+                <tr><th>검토항목</th><th>검토결과</th></tr>
+                <tr><td>지역/지구</td><td>${zone}</td></tr>
+                <tr><td>도로접촉</td><td>${road}</td></tr>
+                <tr><td>일조권</td><td>${sun}</td></tr>
+                <tr><td>에너지절약</td><td>${energy}</td></tr>
+                <tr><td>종합의견</td><td>${memo}</td></tr>
+            </table>`;
+        document.getElementById('res3').innerHTML = html;
+    }
+
+    // [4] 정화조 계산
+    function toggleSepInput() {
+        const val = document.getElementById('sep_type').value;
+        document.getElementById('sep_custom_box').style.display = (val === 'custom') ? 'block' : 'none';
+    }
+
+    function calcSeptic() {
+        let k = document.getElementById('sep_type').value;
+        if(k === 'custom') k = document.getElementById('sep_coeff').value;
         
-        const selection = window.getSelection();
+        const area = parseFloat(document.getElementById('sep_area').value);
+        if(!k || !area) return alert("값을 확인해주세요.");
+
+        // 인원(N) = 오염계수(k) * 연면적(A)
+        const n = (parseFloat(k) * area).toFixed(2);
+        
+        // 정화조 규격 추천 (5인용, 10인용 등)
+        let recommend = 5;
+        if(n > 5) recommend = Math.ceil(n/5)*5; // 5단위 올림 처리 예시
+
+        const html = `
+            <table class="res-table">
+                <tr><th>적용계수</th><td>${k} (N/m²)</td></tr>
+                <tr><th>연면적</th><td>${area} m²</td></tr>
+                <tr><th>산정인원</th><td style="color:#2DB400; font-weight:bold;">${n} 인</td></tr>
+                <tr><th>추천용량</th><td><b>${recommend} 인용</b> 이상<br><span style="font-size:11px;">(제조사 규격 확인요망)</span></td></tr>
+            </table>`;
+        document.getElementById('res4').innerHTML = html;
+    }
+
+    // 복사 기능
+    function copyDiv(id) {
+        const node = document.getElementById(id);
+        if(node.innerText === "결과가 여기에 표시됩니다.") return alert("먼저 계산을 실행해주세요.");
+        
         const range = document.createRange();
         range.selectNodeContents(node);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
         
         try {
             document.execCommand('copy');
-            alert('표가 복사되었습니다. 블로그에 붙여넣으세요!');
+            alert("복사되었습니다! 블로그에 붙여넣기(Ctrl+V) 하세요.");
         } catch(e) {
-            alert('복사 실패. 드래그해서 복사해주세요.');
+            alert("복사 실패. 드래그해서 복사해주세요.");
         }
-        selection.removeAllRanges();
+        sel.removeAllRanges();
     }
 </script>
 
