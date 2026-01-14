@@ -3,38 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>건축 평수 계산기</title>
+    <title>통합 건축 계산기</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; }
-        .calculator { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background-color: #2DB400; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        button:hover { background-color: #259600; }
-        .result { margin-top: 20px; font-weight: bold; text-align: center; color: #000; }
+        /* 기본 스타일 설정 */
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        /* 탭 메뉴 스타일 */
+        .tab-menu { display: flex; background-color: #f8f9fa; border-bottom: 1px solid #ddd; }
+        .tab-btn { flex: 1; padding: 15px 0; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; font-size: 15px; transition: 0.3s; }
+        .tab-btn:hover { background-color: #e9ecef; }
+        .tab-btn.active { color: #2DB400; border-bottom: 3px solid #2DB400; background-color: white; }
+
+        /* 계산기 내용 영역 */
+        .tab-content { display: none; padding: 25px; animation: fadeEffect 0.5s; }
+        .tab-content.active { display: block; }
+        
+        /* 입력폼과 버튼 */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #333; }
+        input, select { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; -webkit-appearance: none; }
+        input:focus { border-color: #2DB400; outline: none; }
+        
+        .calc-btn { width: 100%; padding: 15px; background-color: #2DB400; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .calc-btn:active { background-color: #249100; transform: scale(0.98); }
+
+        /* 결과창 */
+        .result-box { margin-top: 20px; padding: 15px; background-color: #f1f8ff; border-radius: 8px; border-left: 5px solid #007bff; display: none; }
+        .result-text { font-size: 1.1em; color: #333; line-height: 1.5; }
+        .highlight { color: #d63031; font-weight: bold; font-size: 1.3em; }
+
+        /* 애니메이션 */
+        @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
+        
+        /* 도움말 텍스트 */
+        .note { font-size: 12px; color: #888; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div class="calculator">
-    <h2>📐 건축 면적 계산기</h2>
-    <p>평수를 입력하세요:</p>
-    <input type="number" id="pyeong" placeholder="예: 32">
-    <button onclick="convert()">계산하기</button>
-    <div class="result" id="output">결과가 여기에 표시됩니다.</div>
+<div class="container">
+    <div class="tab-menu">
+        <button class="tab-btn active" onclick="openTab(event, 'tab1')">평수변환</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab2')">타일계산</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab3')">레미콘</button>
+    </div>
+
+    <div id="tab1" class="tab-content active">
+        <div class="input-group">
+            <label>평수 입력 (평)</label>
+            <input type="number" id="pyeongInput" placeholder="예: 32">
+        </div>
+        <button class="calc-btn" onclick="calcArea()">변환하기</button>
+        <div id="res1" class="result-box"></div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <div class="input-group">
+            <label>시공할 벽/바닥 면적 ($m^2$)</label>
+            <input type="number" id="wallArea" placeholder="가로(m) × 세로(m) 결과값">
+        </div>
+        <div class="input-group">
+            <label>타일 한 장 크기 (mm 단위)</label>
+            <div style="display:flex; gap:5px;">
+                <input type="number" id="tileW" placeholder="가로 300">
+                <input type="number" id="tileH" placeholder="세로 600">
+            </div>
+        </div>
+        <div class="input-group">
+            <label>로스율 (여유분)</label>
+            <select id="lossRate">
+                <option value="1.05">5% (일반적)</option>
+                <option value="1.10">10% (초보/복잡한구조)</option>
+                <option value="1.00">여유분 없음</option>
+            </select>
+        </div>
+        <button class="calc-btn" onclick="calcTile()">필요 수량 계산</button>
+        <div id="res2" class="result-box"></div>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <div class="input-group">
+            <label>가로 길이 (m)</label>
+            <input type="number" id="concW" placeholder="미터 단위">
+        </div>
+        <div class="input-group">
+            <label>세로 길이 (m)</label>
+            <input type="number" id="concL" placeholder="미터 단위">
+        </div>
+        <div class="input-group">
+            <label>타설 높이 (cm)</label> <input type="number" id="concH" placeholder="센티미터 단위 (예: 10)">
+        </div>
+        <button class="calc-btn" onclick="calcConcrete()">부피($m^3$) 계산</button>
+        <p class="note">* 레미콘 1차는 보통 6루베($m^3$)입니다.</p>
+        <div id="res3" class="result-box"></div>
+    </div>
 </div>
 
 <script>
-    function convert() {
-        const pyeong = document.getElementById('pyeong').value;
-        if(pyeong) {
-            // 1평 = 3.305785 m^2
-            const m2 = (pyeong * 3.305785).toFixed(2);
-            document.getElementById('output').innerHTML = 
-                `${pyeong}평은 약 <span style="color:red; font-size:1.2em;">${m2}</span> $m^2$ 입니다.`;
-        } else {
-            alert("숫자를 입력해주세요!");
+    // 탭 전환 함수
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
         }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    // 1. 평수 계산 로직
+    function calcArea() {
+        const p = parseFloat(document.getElementById('pyeongInput').value);
+        if(!p) return alert("평수를 입력해주세요");
+        const m2 = (p * 3.305785).toFixed(2);
+        showResult('res1', `${p}평은 <br><span class="highlight">${m2}</span> $m^2$(헤베) 입니다.`);
+    }
+
+    // 2. 타일 계산 로직
+    function calcTile() {
+        const area = parseFloat(document.getElementById('wallArea').value);
+        const w = parseFloat(document.getElementById('tileW').value);
+        const h = parseFloat(document.getElementById('tileH').value);
+        const loss = parseFloat(document.getElementById('lossRate').value);
+
+        if(!area || !w || !h) return alert("모든 값을 입력해주세요");
+
+        // 타일 한 장 면적 (mm -> m 변환)
+        const tileArea = (w / 1000) * (h / 1000);
+        // 필요 매수 = (전체면적 / 타일한장) * 로스율
+        const count = Math.ceil((area / tileArea) * loss);
+        
+        showResult('res2', `필요한 타일은 약 <br><span class="highlight">${count}</span> 장 입니다.<br><span style="font-size:0.8em; color:#666">(여유분 포함)</span>`);
+    }
+
+    // 3. 레미콘 계산 로직
+    function calcConcrete() {
+        const w = parseFloat(document.getElementById('concW').value);
+        const l = parseFloat(document.getElementById('concL').value);
+        const h = parseFloat(document.getElementById('concH').value); // cm
+
+        if(!w || !l || !h) return alert("모든 치수를 입력해주세요");
+
+        // 부피 = 가로 * 세로 * 높이(m로 변환)
+        const vol = (w * l * (h / 100)).toFixed(2);
+        // 레미콘 차(6루베 기준)
+        const trucks = (vol / 6).toFixed(1);
+
+        showResult('res3', `필요한 콘크리트는 <br><span class="highlight">${vol}</span> 루베($m^3$) 입니다.<br>레미콘 믹서 트럭(6$m^3$) 기준 <br>약 <b>${trucks}대</b> 분량입니다.`);
+    }
+
+    // 결과 보여주기 도우미 함수
+    function showResult(id, html) {
+        const box = document.getElementById(id);
+        box.innerHTML = '<div class="result-text">' + html + '</div>';
+        box.style.display = 'block';
     }
 </script>
 
